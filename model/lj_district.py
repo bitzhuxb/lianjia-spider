@@ -1,0 +1,30 @@
+import sqlalchemy
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from config import config
+from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
+engine = create_engine(config.DB_CONNECT_STRING, echo=config.DB_ECHO)
+class LjDistrict(Base):
+    __tablename__ = 'lj_district'
+    district = Column(String(500),primary_key=True)
+    city = Column(String(1000))
+    district_name = Column(String(1000))
+    update_time = Column(DateTime)
+
+
+    @classmethod
+    def setup(cls):
+        Base.metadata.create_all(engine)
+    @classmethod
+    def loadData(cls, data):
+        DB_Session = sessionmaker(bind=engine)
+        session = DB_Session()
+        session.execute(
+           LjDistrict.__table__.insert().prefix_with('IGNORE'),data
+        )
+        session.commit()
+if __name__ == "__main__":
+    LjDistrict.setup()
